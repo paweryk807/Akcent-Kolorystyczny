@@ -1,0 +1,8 @@
+﻿  pch.cpp
+  dllmain.cpp
+  DLL_C.cpp
+C:\Users\bambe\source\repos\Akcent_Koloru\DLL_C\DLL_C.cpp(6,1): warning C4273: "foo": niespójne powiązanie biblioteki dll
+C:\Users\bambe\source\repos\Akcent_Koloru\DLL_C\DLL_C.h(9,26): message : zobacz poprzednią definicję „foo”
+  Generowanie kodu...
+     Trwa tworzenie biblioteki C:\Users\bambe\source\repos\Akcent_Koloru\Debug\DLL_C.lib i obiektu C:\Users\bambe\source\repos\Akcent_Koloru\Debug\DLL_C.exp
+  DLL_C.vcxproj -> C:\Users\bambe\source\repos\Akcent_Koloru\Debug\DLL_C.dll

@@ -1,0 +1,9 @@
+﻿  Assembling DLL_ASM.asm...
+DLL_ASM.asm(1): error A2013: .MODEL must precede this directive
+DLL_ASM.asm(2): error A2034: must be in segment block : MyProc1
+DLL_ASM.asm(3): error A2034: must be in segment block
+DLL_ASM.asm(4): error A2034: must be in segment block
+DLL_ASM.asm(5): error A2034: must be in segment block
+DLL_ASM.asm(6): error A2034: must be in segment block
+DLL_ASM.asm(7): fatal error A1010: unmatched block nesting : MyProc1
+B:\Visual Studio Enterprise 2019\MSBuild\Microsoft\VC\v160\BuildCustomizations\masm.targets(70,5): error MSB3721: Polecenie ml.exe /c /nologo /Zi /Fo"Release\DLL_ASM.obj" /W3 /errorReport:prompt  /TaDLL_ASM.asm zostało zakończone; kod błędu: 1.

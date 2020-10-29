@@ -1,0 +1,4 @@
+﻿  DLL_C.cpp
+C:\Users\bambe\source\repos\Akcent_Koloru\DLL_C\DLL_C.cpp(5,115): warning C4273: "colorAccent": niespójne powiązanie biblioteki dll
+C:\Users\bambe\source\repos\Akcent_Koloru\DLL_C\DLL_C.h(9,27): message : zobacz poprzednią definicję „colorAccent”
+  DLL_C.vcxproj -> C:\Users\bambe\source\repos\Akcent_Koloru\x64\Debug\DLL_C.dll

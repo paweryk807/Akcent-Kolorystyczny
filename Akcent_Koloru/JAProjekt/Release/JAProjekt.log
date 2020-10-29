@@ -1,0 +1,13 @@
+﻿  JAProjekt.cpp
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(14,28): warning C4101: "rangeBlue": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(18,6): warning C4101: "durationTimeASM": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(17,6): warning C4101: "threads": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(14,16): warning C4101: "rangeGreen": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(18,23): warning C4101: "durationTimeC": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\bambe\source\repos\Akcent_Koloru\JAProjekt\JAProjekt.cpp(14,6): warning C4101: "rangeRed": lokalna zmienna, do której nie istnieje odwołanie
+  Trwa generowanie kodu
+  3 of 40 functions ( 7.5%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    2 functions had inline decision re-evaluated but remain unchanged
+  Zakończono generowanie kodu
+  JAProjekt.vcxproj -> C:\Users\bambe\source\repos\Akcent_Koloru\Release\JAProjekt.exe
