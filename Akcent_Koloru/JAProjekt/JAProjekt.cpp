@@ -1,7 +1,7 @@
 ﻿#include "JAProjekt.h"
 
 typedef void (*akcentC) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
-typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
+typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth, unsigned char* fbmp);
 
 char* readBMP(BITMAPFILEHEADER* &bfh, BITMAPINFOHEADER* &bih, std::string& filename, int& size) {
 	char* tmp; 
@@ -72,7 +72,7 @@ int main()
 	unsigned char* bmp = nullptr;
 
 	std::string sourcePath = R"(C:\Users\bambe\Desktop\testCarBIG.bmp)",
-		destinationPath = R"(C:\Users\bambe\Desktop\test_tulipany_C.bmp)"; // ścieżki do pliku/miejsca zapisu
+		destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_C.bmp)"; // ścieżki do pliku/miejsca zapisu
 
 	int range = 150;
 	int r = 224;// 79;// 218;//137;
@@ -85,7 +85,7 @@ int main()
 	std::cout << "Na Twoim komputerze program powinno wykonywac sie na : " << processor_count << " watkach." << std::endl;
 	
 
-	int threads = 8; 
+	int threads = 5; 
 	std::vector<std::thread> threads_vector;
 	bool ASM = 0;
 
@@ -135,7 +135,9 @@ int main()
 	int offset = bih->biHeight / threads;
 	int linesToProcess =  offset;
 
-	
+	unsigned char* finalBmp = new unsigned char[size];
+	for (int i = 0; i < size; i++)
+		finalBmp[i] = 255;
 
 	if (!ASM) {
 		handlerLib = LoadLibrary(L"DLL_C.dll");
@@ -148,7 +150,7 @@ int main()
 					if (i == threads - 1) {
 						linesToProcess += leftover;
 					}
-					rows = offset*i + linesToProcess;
+					rows =  linesToProcess;
 					threads_vector.push_back(std::thread(functionC, bmp, offset * i, rows, r, g, b, range, stride, lineWidth));
 				}
 
@@ -172,8 +174,8 @@ int main()
 					if (i == threads - 1) {
 						linesToProcess += leftover;
 					}
-					rows = offset * i + linesToProcess;
-					threads_vector.push_back(std::thread(functionASM, bmp, offset * i, rows, r, g, b, range, stride, lineWidth));
+					rows =  linesToProcess;
+					threads_vector.push_back(std::thread(functionASM, bmp, offset * i, rows, r, g, b, range, stride, lineWidth, finalBmp));
 				}
 
 				for (int i = 0; i < threads; i++)

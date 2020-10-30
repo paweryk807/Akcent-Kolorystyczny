@@ -3,7 +3,7 @@
 #include "pch.h"
 
 void colorAccent(unsigned char* bmp, int offset, int rows, int r, int g, int b, int range, int stride, int lineWidth){
-    for (int currentByte = offset; currentByte < rows; currentByte++) {
+    for (int currentByte = offset; currentByte < rows + offset; currentByte++) {
         for (int i = 0; i < lineWidth - 2; i += 3)
         {
              int distance = abs(bmp[currentByte * stride + i] - b);

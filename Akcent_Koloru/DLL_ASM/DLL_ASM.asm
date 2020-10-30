@@ -20,10 +20,15 @@ MyProc1 proc
         push RSI ; r9 - red     rsp+80 - green      rsp+88 - blue    rsp+96 - range     rsp+104 - stride    rsp+112 - lineWidth
         push RSP
         mov RSI, 0
-        ADD RSI, rdx
-        mov r13, r8 ; Licznik w r13
+        mov r13, r8 ; Licznik w r13d
+        mov r14, rdx;
         mov r10d, [rsp + 104]
+        mov RAX, r14
+        mul r10
+        add rcx, RAX
         mov r12d, [rsp + 112]
+        mov r15, [rsp +120] 
+        add r15, RAX
         mov r11, 0
 Main:
         ;Wczytanie 16 pikseli
@@ -268,16 +273,21 @@ Main:
         
         movdqu xmmword ptr[RCX + RSI],  xmm6 
         movdqu xmmword ptr[RCX + RSI + 16],  xmm7
-        movdqu xmmword ptr[RCX + RSI + 32],  xmm8 
+        movdqu xmmword ptr[RCX + RSI + 32],  xmm8
+        
+        movdqu xmmword ptr[R15 + RSI],  xmm6
+        movdqu xmmword ptr[R15 + RSI + 16],  xmm7 
+        movdqu xmmword ptr[R15 + RSI + 32],  xmm8 
 
         add ESI, 48
         sub r12d, 48
-       ; jb Nierowno
+        jb Nierowno
         jg Main
         mov r12d, [rsp+112]
         sub r13,1 
         jz EndProc
         add RCX, R10
+        add r15, r10
         mov ESI, 0
         jg Main
 
@@ -289,10 +299,13 @@ EndProc:
         pop RBX
         ret 
 Nierowno: 
-        neg r12d
-        inc r12d ; Do zapisu u2
+        xor r12d, eax
+        sub r12d, eax
+        ;neg r12d
+        ;inc r12d ; Do zapisu u2
         sub ESI, r12d
         sub ESI, 48
+        mov r12d, 48
         jmp Main
 
 MyProc1 endp
