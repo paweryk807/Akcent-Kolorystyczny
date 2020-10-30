@@ -72,7 +72,7 @@ int main()
 	unsigned char* bmp = nullptr;
 
 	std::string sourcePath = R"(C:\Users\bambe\Desktop\testCarBIG.bmp)",
-		destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_ASM.bmp)"; // ścieżki do pliku/miejsca zapisu
+		destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_C.bmp)"; // ścieżki do pliku/miejsca zapisu
 
 	int range = 150;
 	int r = 224;// 79;// 218;//137;
@@ -85,9 +85,9 @@ int main()
 	std::cout << "Na Twoim komputerze program powinno wykonywac sie na : " << processor_count << " watkach." << std::endl;
 	
 
-	int threads = 8; 
+	int threads = 5; 
 	std::vector<std::thread> threads_vector;
-	bool ASM = 1;
+	bool ASM = 0;
 
 	/*
 	std::cout << "Z jakiej biblioteki chcesz skorzystac?" << std::endl
