@@ -1,8 +1,8 @@
 ﻿  Assembling DLL_ASM.asm...
-     Trwa tworzenie biblioteki C:\Users\bambe\source\repos\Akcent_Koloru\x64\Release\DLL_ASM.lib i obiektu C:\Users\bambe\source\repos\Akcent_Koloru\x64\Release\DLL_ASM.exp
+     Trwa tworzenie biblioteki B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Release\DLL_ASM.lib i obiektu B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Release\DLL_ASM.exp
   Trwa generowanie kodu
   0 of 1 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Zakończono generowanie kodu
-  DLL_ASM.vcxproj -> C:\Users\bambe\source\repos\Akcent_Koloru\x64\Release\DLL_ASM.dll
+  DLL_ASM.vcxproj -> B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Release\DLL_ASM.dll

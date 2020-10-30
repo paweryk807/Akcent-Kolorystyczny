@@ -1,2 +1,5 @@
 ﻿  Assembling DLL_ASM.asm...
-  DLL_ASM.vcxproj -> C:\Users\bambe\source\repos\Akcent_Koloru\x64\Debug\DLL_ASM.dll
+  pch.cpp
+  dllmain.cpp
+     Trwa tworzenie biblioteki B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Debug\DLL_ASM.lib i obiektu B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Debug\DLL_ASM.exp
+  DLL_ASM.vcxproj -> B:\GitHub\Akcent-Kolorystyczny\Akcent_Koloru\x64\Debug\DLL_ASM.dll
