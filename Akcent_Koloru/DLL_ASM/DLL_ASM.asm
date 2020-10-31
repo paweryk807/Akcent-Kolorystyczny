@@ -175,7 +175,7 @@ Main:
         pshufb xmm4, xmmword ptr[condMask2]; <- xmm 4 = b[15-8] / 3 
         
         paddb xmm3, xmm4; <------------------- XMM 3 = b[15-0] /3 
-
+        
         pmullw xmm5, xmm10; g[7-0] * 86 <- xmm5
         psrlw xmm5, 8; 3/256 
         pshufb xmm5, xmmword ptr[condMask1]; <- xmm 5 = g[7-0] / 3 
@@ -213,10 +213,6 @@ Main:
         pand xmm2, xmm9; Te które s¹ zgodne z RANGE > DISTANCE 
         pandn xmm9, xmm3; Dla niezgodnych œrednia
         paddb xmm2, xmm9; Wynik w xmm2
-
-       ; movdqu xmm0, xmm3; 
-       ; movdqu xmm1, xmm3; 
-        ;movdqu xmm2, xmm3; 
 
         ; Przywracanie nale¿ytej kolejnoœci sk³adowych 
         ; Wartoœci Blue
@@ -307,6 +303,6 @@ Nierowno:
         sub ESI, 48
         mov r12d, 48
         jmp Main
-
+       
 MyProc1 endp
 end

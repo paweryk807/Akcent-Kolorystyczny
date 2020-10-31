@@ -57,22 +57,23 @@ bool validateRange(int range) {
 	return false;
 }
 
-void start(bool ASM, int threads, int range, int r, int g, int b) {
-	
-}
-
-int main()
-{	HINSTANCE handlerLib;
+void program(bool ASM, int threads, int range, int r, int g, int b) {
+	HINSTANCE handlerLib;
 	akcentC functionC;
 	akcentASM functionASM;
 
 	BITMAPFILEHEADER* bfh = nullptr;
 	BITMAPINFOHEADER* bih = nullptr;
-
 	unsigned char* bmp = nullptr;
+}
 
-	std::string sourcePath = R"(C:\Users\bambe\Desktop\testCarBIG.bmp)",
-		destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_C.bmp)"; // ścieżki do pliku/miejsca zapisu
+int main()
+{
+
+	
+
+	// std::string sourcePath = R"(C:\Users\bambe\Desktop\testCarBIG.bmp)",
+		// destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_C.bmp)"; // ścieżki do pliku/miejsca zapisu
 
 	int range = 150;
 	int r = 224;// 79;// 218;//137;
@@ -84,46 +85,112 @@ int main()
 	const unsigned int processor_count = std::thread::hardware_concurrency();
 	std::cout << "Na Twoim komputerze program powinno wykonywac sie na : " << processor_count << " watkach." << std::endl;
 	
-
-	int threads = 5; 
+	int threads = 1; 
 	std::vector<std::thread> threads_vector;
 	bool ASM = 0;
-
-	/*
-	std::cout << "Z jakiej biblioteki chcesz skorzystac?" << std::endl
-		<< " 0 - C " << std::endl
-		<< " 1 - ASM " << std::endl;
-	std::cin >> ASM;
-	while (std::cin.fail()) {
-		std::cin.clear();
-		std::cin.ignore();
+	bool exit = false; 
+	int menuKey;
+	while (!exit)
+	{
+		std::cout << "\t\tAkcent Kolorystyczny\t\t" << std::endl << std::endl;
+		std::cout << " 0 - wybierz biblioteke " << std::endl
+			<< " 1 - podaj liczbe watkow na ilu ma sie wykonac procedura " << std::endl
+			<< " 2 - podaj sciezke do pliku " << std::endl
+			<< " 3 - podaj sciezke do pliku wynikowego " << std::endl
+			<< " 4 - podaj kolor ktory chcesz akcentowac " << std::endl
+			<< " 5 - podaj zakres tolerancji " << std::endl
+			<< " 6 - wykonaj procedure " << std::endl
+			<< " 9 - wyjscie " << std::endl;
+		std::cin >> menuKey;
+		if (std::cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore();
+		}
+		else {
+			switch (menuKey) {
+			case 0: {
+				std::cout << "Z jakiej biblioteki chcesz skorzystac?" << std::endl
+					<< " 0 - C " << std::endl
+					<< " 1 - ASM " << std::endl;
+				std::cin >> ASM;
+				while (std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cout << "\x1B[2J\x1B[H";
+					std::cout << "Niepoprawnie wybrano bibliotekę. Wybierz ponownie:" << std::endl
+						<< " 0 - C " << std::endl
+						<< " 1 - ASM " << std::endl;
+					std::cin >> ASM;
+				}
+			}
+				  break;
+			case 1:
+				std::cout << "Ile watkow chcesz wyorzystac?  ( 0 - 64 )" << std::endl;
+				std::cin >> threads;
+				while (!validateThreadsCount(threads) || std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cout << "\x1B[2J\x1B[H";
+					std::cout << "Podano bledna liczbe watkow. ( 0 - 64 ) Wybierz ponownie:" << std::endl;
+					std::cin >> threads;
+				}
+				break;
+			case 2: {
+			}
+				  break;
+			case 3: {
+			}
+				  break;
+			case 4: {
+				std::cout << "Podaj wartosci r g b wybranego przez Ciebie koloru oraz zakres akcentowania sumy wartosci. " << std::endl
+					<< "Zakres dla kazdej ze skladowych to 0 - 255" << std::endl;
+				std::cout << "Podaj wartosc skladowej czerwieni : " << std::endl;
+				std::cin >> r;
+				while (!validateRange(r) || std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cin >> r;
+				}
+				std::cout << "Podaj wartosc skladowej zieleni : " << std::endl;
+				std::cin >> g;
+				while (!validateRange(g) || std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cin >> g;
+				}
+				std::cout << "Podaj wartosc skladowej niebieskiego : " << std::endl;
+				std::cin >> b;
+				while (!validateRange(b) || std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cin >> b;
+				}
+			}
+				  break;
+			case 5: {
+				std::cout << "Podaj zakres bezwzglednych roznic miedzy wybrana barwa a odcieniami obrazu." << std::endl
+					<< "Akceptowane wartości z przedziału: 0 - 255" << std::endl;
+				std::cin >> range;
+				while (!validateRange(range) || std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore();
+					std::cin >> range;
+				}
+			}
+			case 6: {
+			}
+				  break;
+			case 9: {
+				exit = true;
+				std::cout << "\x1B[2J\x1B[H" << "\t\tDo widzenia!\t\t" << std::endl;
+				Sleep(1000);
+			}
+				  break;
+			}
+		}
 		std::cout << "\x1B[2J\x1B[H";
-		std::cout << "Niepoprawnie wybrano bibliotekę. Wybierz ponownie:"<<std::endl
-				  << " 0 - C " << std::endl
-				  << " 1 - ASM " << std::endl;
-		std::cin >> ASM;
-	}
-	
-	std::cout << "Ile watkow chcesz wyorzystac?  ( 0 - 64 )" << std::endl;
-	std::cin >> threads;
-	while (!validateThreadsCount(threads) || std::cin.fail()) {
-		std::cin.clear();
-		std::cin.ignore();
-		std::cout << "\x1B[2J\x1B[H";
-		std::cout << "Podano bledna liczbe watkow. ( 0 - 64 ) Wybierz ponownie:" << std::endl;
-		std::cin >> threads;
-	}	
-	
-	std::cout << "Podaj wartosci r g b wybranego przez Ciebie koloru oraz zakres akcentowania sumy wartosci " << std::endl
-			  << "bezwzglednych roznic miedzy wybrana barwa a odcieniami obrazu." << std::endl
-		      << "Zakres dla kazdej ze skladowych to 0 - 255"<<std::endl;
-	std::cout << "Podaj wartosc skladowej czerwieni : "<<std::endl;
-	std::cin >> r;
-	while (!validateRange(r) || std::cin.fail()) {
-
 	}
 
-	*/
 	try {
 	int size = 0;
 	int rows = 0;
