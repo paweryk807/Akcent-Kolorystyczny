@@ -1,27 +1,40 @@
 ﻿#include "JAProjekt.h"
-
+/*
+* Akcent Kolorystyczny
+* Algorytm pozostawiający na przetworzonym obrazie wybraną przez użytkownika barwę oraz odcienie mieszczące się w podanym przez
+* użytkownika zakresie. To, czy dany kolor mieści się w zakresie liczone jest na bazie sumy wartości
+* bezwzględnych róznic między składowymi r, g, b barwy podanej oraz aktualnie sprawdzanego piksela w obrazie.
+* Odcienie niemieszczące się w zakresie zostają przekształcone w odcienie szarości.
+* Data wykonania: 31.10.2020
+* Rok akademicki 2020/2021
+* Autor: Paweł Rykała
+* AEiI Informatyka semestr 5, grupa 6
+*/
 typedef void (*akcentC) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
-typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth, unsigned char* fbmp);
+typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
 
-char* readBMP(BITMAPFILEHEADER* &bfh, BITMAPINFOHEADER* &bih, std::string& filename, int& size) {
+char* readBMP(m_Bitmap& bitmap, std::string& filename) {
 	char* tmp; 
 	std::ifstream input(&filename[0], std::ios::binary);
 	if (input.is_open()) {
 		tmp = new char [sizeof(BITMAPFILEHEADER)];
 		input.read(tmp, sizeof(BITMAPFILEHEADER));
-		bfh = (BITMAPFILEHEADER*)tmp;
+		bitmap.bfh = (BITMAPFILEHEADER*)tmp;
 		tmp = new char[sizeof(BITMAPINFOHEADER)];
 		input.read(tmp, sizeof(BITMAPINFOHEADER));
-		bih = (BITMAPINFOHEADER*)tmp;
-		input.seekg((bfh->bfOffBits), std::ios::beg); // Początek obrazu
+		bitmap.bih = (BITMAPINFOHEADER*)tmp;
+		input.seekg((bitmap.bfh->bfOffBits), std::ios::beg); // Początek obrazu
 
-		int width = ((int)bih->biWidth) * 3;
+		int width = ((int)(bitmap.bih->biWidth)) * 3;
 		if (width % 4)
 			width += 4 - (width % 4);
-		size = (width * bih->biHeight);
-		// width = width * 3;
-		tmp = new char[size];
-		input.read(tmp, size);
+		bitmap.size = (width * (bitmap.bih->biHeight));
+		if (bitmap.size < (16 * 3 * 16)) {
+			throw std::exception("File size exception");
+			return nullptr;
+		}
+		tmp = new char[bitmap.size];
+		input.read(tmp, bitmap.size);
 		input.close();
 		return tmp;
 	}
@@ -31,13 +44,13 @@ char* readBMP(BITMAPFILEHEADER* &bfh, BITMAPINFOHEADER* &bih, std::string& filen
 	return nullptr;
 }
 
-void writeBMP(unsigned char* bmp, BITMAPFILEHEADER* bfh, BITMAPINFOHEADER* bih, std::string& filename, int size) {
+void writeBMP(m_Bitmap& bitmap, std::string& filename) {
 	std::ofstream output(&filename[0], std::ios::binary);
  	if (output.is_open()) {
-		output.write((char*) bfh, sizeof(BITMAPFILEHEADER));
-		output.write((char*) bih, sizeof(BITMAPINFOHEADER));
-		char *tmp = (char*)bmp;
-		output.write(tmp, size);
+		output.write((char*) bitmap.bfh, sizeof(BITMAPFILEHEADER));
+		output.write((char*) bitmap.bih, sizeof(BITMAPINFOHEADER));
+		char *tmp = (char*)bitmap.bmp;
+		output.write(tmp, bitmap.size);
 		output.close();
 	}
 	else {
@@ -57,39 +70,109 @@ bool validateRange(int range) {
 	return false;
 }
 
-void program(bool ASM, int threads, int range, int r, int g, int b) {
+int program(Program_params params) {
+	int time = 0;	
+	int rows = 0;
+
 	HINSTANCE handlerLib;
+
 	akcentC functionC;
 	akcentASM functionASM;
 
-	BITMAPFILEHEADER* bfh = nullptr;
-	BITMAPINFOHEADER* bih = nullptr;
-	unsigned char* bmp = nullptr;
+	m_Bitmap bitmap;
+
+	std::vector<std::thread> threads_vector;
+
+	try {
+		bitmap.bmp = (unsigned char*)readBMP(bitmap,params.sourcePath); // Wczytanie obrazu 
+
+		int lineWidth = (bitmap.bih->biWidth) * 3;
+		int stride = bitmap.size / bitmap.bih->biHeight;
+		int leftover = (bitmap.bih->biHeight % params.threads);
+		int offset = bitmap.bih->biHeight / params.threads;
+		int linesToProcess = offset;
+
+		if (!params.ASM) {
+			handlerLib = LoadLibrary(L"DLL_C.dll");
+			if (handlerLib) {
+				functionC = (akcentC)GetProcAddress(handlerLib, "colorAccent");
+				if (functionC) {
+
+					auto start = std::chrono::steady_clock::now();
+					for (int i = 0; i < params.threads; i++) {
+						if (i == params.threads - 1) {
+							linesToProcess += leftover;
+						}
+						rows = linesToProcess;
+						threads_vector.push_back(std::thread(functionC, bitmap.bmp, offset * i, rows, params.r, params.g, params.b, params.range, stride, lineWidth));
+					}
+
+					for (int i = 0; i < params.threads; i++)
+						threads_vector[i].join();
+
+					auto end = std::chrono::steady_clock::now();
+					time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+				}
+				else throw std::exception("Biblioteka C nie dziala poprawnie");
+			}
+		}
+		else {
+			handlerLib = LoadLibrary(L"DLL_ASM.dll");
+			if (handlerLib) {
+				functionASM = (akcentASM)GetProcAddress(handlerLib, "MyProc1");
+				if (functionASM)
+				{
+					auto start = std::chrono::steady_clock::now();
+					for (int i = 0; i < params.threads; i++) {
+						if (i == params.threads - 1) {
+							linesToProcess += leftover;
+						}
+						rows = linesToProcess;
+						threads_vector.push_back(std::thread(functionASM, bitmap.bmp, offset * i, rows, params.r, params.g, params.b, params.range, stride, lineWidth));
+					}
+
+					for (int i = 0; i < params.threads; i++)
+						threads_vector[i].join();
+
+					auto end = std::chrono::steady_clock::now();
+					time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+				}
+				else throw std::exception("Biblioteka ASM nie dziala poprawnie");
+			}
+		}
+		writeBMP(bitmap, params.destinationPath);
+		FreeLibrary(handlerLib);
+	}
+	catch (std::exception e) {
+		std::cout << e.what() << std::endl;
+	}
+	
+	delete[] bitmap.bmp;
+	delete bitmap.bfh;
+	delete bitmap.bih;
+	return time;
 }
 
 int main()
 {
+	std::regex bmp_reg("[[:print:]]*.bmp");
+	std::string sourcePath = "",
+		destinationPath = "";
 
-	
-
-	// std::string sourcePath = R"(C:\Users\bambe\Desktop\testCarBIG.bmp)",
-		// destinationPath = R"(C:\Users\bambe\Desktop\test_toyota_C.bmp)"; // ścieżki do pliku/miejsca zapisu
-
-	int range = 150;
-	int r = 224;// 79;// 218;//137;
-	int g = 22;// 29;// 212;// 28;
-	int b = 2;// 52;// 2;// 36;
-
-	int offset = 0;
+	int range = 0;
+	int r = 0;
+	int g = 0;
+	int b = 0;
 
 	const unsigned int processor_count = std::thread::hardware_concurrency();
-	std::cout << "Na Twoim komputerze program powinno wykonywac sie na : " << processor_count << " watkach." << std::endl;
 	
 	int threads = 1; 
-	std::vector<std::thread> threads_vector;
-	bool ASM = 0;
+
+	bool ASM = 1;
 	bool exit = false; 
 	int menuKey;
+
+	Program_params params(ASM, threads, range, r, g, b, sourcePath, destinationPath);
 	while (!exit)
 	{
 		std::cout << "\t\tAkcent Kolorystyczny\t\t" << std::endl << std::endl;
@@ -101,6 +184,11 @@ int main()
 			<< " 5 - podaj zakres tolerancji " << std::endl
 			<< " 6 - wykonaj procedure " << std::endl
 			<< " 9 - wyjscie " << std::endl;
+		std::cout << std::endl <<"Aktualne parametry : " << std::endl
+			<< "Sciezka do pliku : " << sourcePath << std::endl
+			<< "Sciezka do pliku wynikowego : " << destinationPath << std::endl
+			<< "Ilosc watkow do wykonania procedury : " << threads << std::endl
+			<< "Akcentowany kolor : (" << r << ", " << g << ", " << b << "), zakres : " << range << std::endl;
 		std::cin >> menuKey;
 		if (std::cin.fail()) {
 			std::cin.clear();
@@ -116,30 +204,43 @@ int main()
 				while (std::cin.fail()) {
 					std::cin.clear();
 					std::cin.ignore();
-					std::cout << "\x1B[2J\x1B[H";
-					std::cout << "Niepoprawnie wybrano bibliotekę. Wybierz ponownie:" << std::endl
-						<< " 0 - C " << std::endl
-						<< " 1 - ASM " << std::endl;
 					std::cin >> ASM;
 				}
 			}
 				  break;
-			case 1:
-				std::cout << "Ile watkow chcesz wyorzystac?  ( 0 - 64 )" << std::endl;
+			case 1: {
+				std::cout << "Na Twoim komputerze program powinno wykonywac sie na : " << processor_count << " watkach." << std::endl;
+				std::cout << "Ile watkow chcesz wyorzystac?  ( 1 - 64 )" << std::endl;
 				std::cin >> threads;
 				while (!validateThreadsCount(threads) || std::cin.fail()) {
 					std::cin.clear();
 					std::cin.ignore();
-					std::cout << "\x1B[2J\x1B[H";
-					std::cout << "Podano bledna liczbe watkow. ( 0 - 64 ) Wybierz ponownie:" << std::endl;
 					std::cin >> threads;
 				}
-				break;
+			}
+				  break;
 			case 2: {
+				std::cout << "Wprowadz sciezke do pliku, ktory ma byc przetworzony. " << std::endl;
+				std::cin >> sourcePath;
+				while (std::cin.fail() || !std::regex_match(sourcePath, bmp_reg)) {
+					std::cin.clear();
+					std::cin.ignore();
+					sourcePath = "";
+					std::cout << "Podano bledna sciezke do pliku, sprobuj jeszcze raz." << std::endl;
+					std::cin >> sourcePath;
+				}
 			}
 				  break;
 			case 3: {
-			}
+				std::cout << "Wprowadz sciezke dla pliku wynikowego. " << std::endl;
+				std::cin >> destinationPath;
+				while (std::cin.fail() || !std::regex_match(destinationPath, bmp_reg)) {
+					std::cin.clear();
+					std::cin.ignore();
+					destinationPath = "";
+					std::cout << "Podano bledna sciezke do pliku wynikowego, sprobuj jeszcze raz." << std::endl;
+					std::cin >> destinationPath;
+				}}
 				  break;
 			case 4: {
 				std::cout << "Podaj wartosci r g b wybranego przez Ciebie koloru oraz zakres akcentowania sumy wartosci. " << std::endl
@@ -175,9 +276,23 @@ int main()
 					std::cin.clear();
 					std::cin.ignore();
 					std::cin >> range;
-				}
+				}	
 			}
+				  break;
 			case 6: {
+				params.ASM = ASM;
+				params.threads = threads;
+				params.range = range;
+				params.r = r;
+				params.g = g;
+				params.b = b;
+				params.sourcePath = sourcePath;
+				params.destinationPath = destinationPath;
+				std::cout << "Wykonano w " << program(params) << " ms." << std::endl;
+				if (ASM) std::cout << " Korzystano z biblioteki ASM, plik zapisany w : " << destinationPath << std::endl;
+				else std::cout << " Korzystano z biblioteki C, plik zapisany w : " << destinationPath << std::endl;
+				std::cout << "Korzystano z nastepujacej liczby watkow : " << threads << ". Akcentowany kolor : ("<<r<<", "<<g<<", "<<b<<"), zakres : "<<range;
+				Sleep(1000);
 			}
 				  break;
 			case 9: {
@@ -190,80 +305,4 @@ int main()
 		}
 		std::cout << "\x1B[2J\x1B[H";
 	}
-
-	try {
-	int size = 0;
-	int rows = 0;
-	bmp = (unsigned char*)readBMP(bfh, bih, sourcePath, size); // Wczytanie obrazu 
-
-	int lineWidth = (bih->biWidth) * 3;
-	int stride = size / bih->biHeight;
-	int leftover = (bih->biHeight % threads);
-	int offset = bih->biHeight / threads;
-	int linesToProcess =  offset;
-
-	unsigned char* finalBmp = new unsigned char[size];
-	for (int i = 0; i < size; i++)
-		finalBmp[i] = 255;
-
-	if (!ASM) {
-		handlerLib = LoadLibrary(L"DLL_C.dll");
-		if (handlerLib) {
-			functionC = (akcentC)GetProcAddress(handlerLib, "colorAccent");
-			if (functionC) {
-
-				auto start = std::chrono::steady_clock::now();
-				for (int i = 0; i < threads; i++) {
-					if (i == threads - 1) {
-						linesToProcess += leftover;
-					}
-					rows =  linesToProcess;
-					threads_vector.push_back(std::thread(functionC, bmp, offset * i, rows, r, g, b, range, stride, lineWidth));
-				}
-
-				for (int i = 0; i < threads; i++)
-					threads_vector[i].join();
-			
-				auto end = std::chrono::steady_clock::now();
-				std::cout << "Wykonano w " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-			}
-			else std::cout << "Biblioteka C nie dziala poprawnie\n";
-		}
-	}
-	else {
-		handlerLib = LoadLibrary(L"DLL_ASM.dll");
-		if (handlerLib) {
-			functionASM = (akcentASM)GetProcAddress(handlerLib, "MyProc1");
-			if (functionASM)
-			{
-				auto start = std::chrono::steady_clock::now();
-				for (int i = 0; i < threads; i++) {
-					if (i == threads - 1) {
-						linesToProcess += leftover;
-					}
-					rows =  linesToProcess;
-					threads_vector.push_back(std::thread(functionASM, bmp, offset * i, rows, r, g, b, range, stride, lineWidth, finalBmp));
-				}
-
-				for (int i = 0; i < threads; i++)
-					threads_vector[i].join();
-
-				auto end = std::chrono::steady_clock::now();
-
-				std::cout << "Wykonano w " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-			}
-			else std::cout << "Biblioteka ASM nie dziala poprawnie\n";
-		}
-	}	
-	writeBMP(bmp, bfh, bih, destinationPath, size);
-	FreeLibrary(handlerLib);
-	delete[] bmp;
-	delete bfh;
-	delete bih;
-	}
-	catch (std::exception e) {
-		std::cout << e.what() << std::endl;
-	}
-
-
 }
