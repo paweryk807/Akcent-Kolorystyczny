@@ -10,8 +10,8 @@
 * Autor: Paweł Rykała
 * AEiI Informatyka semestr 5, grupa 6
 */
-typedef void (*akcentC) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
-typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int size, int r, int g, int b, int range, int stride, int lineWidth);
+typedef void (*akcentC) (unsigned char* bmp, int offset, int rows, int r, int g, int b, int range, int stride, int lineWidth);
+typedef DWORD(*akcentASM) (unsigned char* bmp, int offset, int rows, int r, int g, int b, int range, int stride, int lineWidth);
 
 char* readBMP(m_Bitmap& bitmap, std::string& filename) {
 	char* tmp; 

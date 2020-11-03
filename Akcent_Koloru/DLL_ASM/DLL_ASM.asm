@@ -150,26 +150,26 @@ Main:
         pabsw xmm15, xmm15; ABS(B-b[15-8]) - XMM 15
 
         paddw xmm10, xmm13 
-        paddw xmm10, xmm14; DISTANCE [7-0] - XMM 10
+        paddw xmm10, xmm14; Suma wartoœci bezwzglêdnych [7-0] - XMM 10
        
         paddw xmm11, xmm12 
-        paddw xmm11, xmm15; DISTANCE [15-8] - XMM 11
+        paddw xmm11, xmm15; Suma wartoœci bezwzglêdnych [15-8] - XMM 11
         
         ;Wczytywanie zakresu
         mov EAX, [rsp+96] 
         movd xmm9, eax;
-        pshufb xmm9, xmmword ptr[multiplyMoveMask2]; Range na 16 bitach
+        pshufb xmm9, xmmword ptr[multiplyMoveMask2]; Zakres na 16 bitach
         
         movdqu xmm12, xmm9 
-        pcmpgtw xmm12, xmm10; Range > Distance [7-0] - XMM 12
-        pcmpgtw xmm9, xmm11; Range > Distance [15-8] - XMM 9 
+        pcmpgtw xmm12, xmm10; Zakres > Sumy wartoœci bezwzglêdnych [7-0] - XMM 12
+        pcmpgtw xmm9, xmm11; Zakres > Sumy wartoœci bezwzglêdnych [15-8] - XMM 9 
         psllq xmm12,8
         psrlq xmm12,8
         pshufb xmm12, xmmword ptr[condMask1]
         psllq xmm9,8
         psrlq xmm9,8
         pshufb xmm9, xmmword ptr[condMask2]
-        paddb xmm9, xmm12; <---- Czy range > distance  - XMM 9 
+        paddb xmm9, xmm12; <---- Czy Zakres > Sumy wartoœci bezwzglêdnych  - XMM 9 
      
         mov EAX, 86;  256/3 + 1 = 86 
         movd xmm10, EAX
@@ -210,16 +210,16 @@ Main:
 
         ;Warunkowe uk³adanie sk³adowych (pierwotna barwa lub œrednia) 
         movdqu xmm4, xmm9; Kopiujê warunek 
-        pand xmm0, xmm9; Te z b które s¹ zgodne z RANGE > DISTANCE 
+        pand xmm0, xmm9; Te z b które s¹ zgodne z Zakres > Sumy wartoœci bezwzglêdnych 
         pandn xmm4, xmm3; Œrednia dla niezgodnych 
-        paddb xmm0, xmm4; Wynik w XMM 0 
+        paddb xmm0, xmm4; Wynik w xmm 0 
 
         movdqu xmm4, xmm9; Kopiujê warunek
-        pand xmm1, xmm9; Te które s¹ zgodne z RANGE > DISTANCE 
+        pand xmm1, xmm9; Te z g które s¹ zgodne z Zakres > Sumy wartoœci bezwzglêdnych 
         pandn xmm4, xmm3; Œrednia dla niezgodnych
         paddb xmm1, xmm4; Wynik w xmm1  
 
-        pand xmm2, xmm9; Te które s¹ zgodne z RANGE > DISTANCE 
+        pand xmm2, xmm9; Te z r które s¹ zgodne z Zakres > Sumy wartoœci bezwzglêdnych 
         pandn xmm9, xmm3; Dla niezgodnych œrednia
         paddb xmm2, xmm9; Wynik w xmm2
 
