@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <windows.h>
+#include <regex>
 #include <chrono>
 #include <thread>
 #include <string>
@@ -12,16 +13,22 @@
 
 extern "C" void MyProc1(DWORD x, DWORD y);
 
-struct Params {
-	unsigned char* bmp;
-	int offset;
-	int rows; 
+struct Program_params {
+	bool ASM;
+	int threads;
+	int range;
 	int r;
 	int g;
-	int b; 
-	int range;
-	int stride;
-	int lineWidth;
-	Params(unsigned char* bitmap, int off, int row, int R, int G, int B, int Range, int Stride, int LineWidth) :
-		bmp(bitmap), offset(off), rows(row), r(R), g(G), b(B), range(Range), stride(Stride), lineWidth(LineWidth) {};
+	int b;
+	std::string sourcePath;
+	std::string destinationPath;
+	Program_params(bool _ASM, int _threads, int _range, int _r, int _g, int _b, std::string _sourcePath, std::string _destinationPath)
+		: ASM(_ASM), threads(_threads), range(_range), r(_r), g(_g), b(_b), sourcePath(_sourcePath), destinationPath(_destinationPath) {};
+};
+
+struct m_Bitmap {
+	unsigned char* bmp;
+	int size;
+	BITMAPFILEHEADER* bfh;
+	BITMAPINFOHEADER* bih;
 };
